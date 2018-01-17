@@ -26,20 +26,9 @@ class Client:
 
     def init_chat(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM )
-
-        # if len(argv) > 1, we assume they're giving an IP address to connect to
-        # else, use the localhost as defined in chat_utils.py
-        '''
-        if len(sys.argv) > 1:
-            alt_IP = sys.argv[-1]
-            alt_SERVER = (alt_IP, CHAT_PORT)
-            self.socket.connect(alt_SERVER)
-        else:
-            self.socket.connect(SERVER)
-        '''
         if self.args.d == None:
             self.socket.connect(SERVER)
-        else:
+        else: # connect to specified, perhaps remote, server
             self.socket.connect((self.args.d, CHAT_PORT))
 
         self.sm = csm.ClientSM(self.socket)
