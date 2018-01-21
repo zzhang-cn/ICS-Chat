@@ -46,7 +46,6 @@ class Server:
         #read the msg that should have login code plus username
         msg = json.loads(myrecv(sock))
         if len(msg) > 0:
-            #code = msg[0]
 
             if msg["action"] == "login":
                 name = msg["name"]
