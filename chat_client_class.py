@@ -62,17 +62,17 @@ class Client:
         my_msg, peer_msg = self.get_msgs()
         if len(my_msg) > 0:
             self.name = my_msg
-            msg = M_LOGIN + self.name
+            msg = json.dumps({"action":"login", "name":self.name})
             self.send(msg)
-            response = self.recv()
-            if response == M_LOGIN+'ok':
+            response = json.loads(self.recv())
+            if response["status"] == 'ok':
                 self.state = S_LOGGEDIN
 # zz: change!
                 self.sm.set_state(S_LOGGEDIN)
                 self.sm.set_myname(self.name)
                 self.print_instructions()
                 return (True)
-            elif response == M_LOGIN + 'duplicate':
+            elif response["status"] == 'duplicate':
                 self.system_msg += 'Duplicate username, try again'
                 return False
         else:               # fix: dup is only one of the reasons
