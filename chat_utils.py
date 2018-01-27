@@ -12,7 +12,9 @@ M_LIST      = '7'
 M_POEM      = '8'
 M_TIME      = '9'
 
-CHAT_IP = socket.gethostname()
+# use local loop back address by default
+#CHAT_IP = '127.0.0.1'
+CHAT_IP = socket.gethostbyname(socket.gethostname())
 CHAT_PORT = 1112
 SERVER = (CHAT_IP, CHAT_PORT)
 
@@ -45,7 +47,7 @@ def print_state(state):
         print('Chatting')
     else:
         print('Error: wrong state')
-    
+
 def mysend(s, msg):
     #append size to message and send it
     msg = ('0' * SIZE_SPEC + str(len(msg)))[-SIZE_SPEC:] + str(msg)
@@ -78,7 +80,7 @@ def myrecv(s):
         msg += text
     #print ('received '+message)
     return (msg)
-    
+
 def text_proc(text, user):
     ctime = time.strftime('%d.%m.%y,%H:%M', time.localtime())
     return('(' + ctime + ') ' + user + ' : ' + text) # message goes directly to screen

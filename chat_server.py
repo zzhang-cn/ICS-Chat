@@ -33,7 +33,7 @@ class Server:
         self.sonnet_f = open('AllSonnets.txt.idx', 'rb')
         self.sonnet = pkl.load(self.sonnet_f)
         self.sonnet_f.close()
-        
+
     def new_client(self, sock):
         #add to all sockets and to new clients
         print('new client...')
@@ -87,10 +87,10 @@ class Server:
 # main command switchboard
 #==============================================================================
     def handle_msg(self, from_sock):
-        #read msg code 
+        #read msg code
         msg = myrecv(from_sock)
         if len(msg) > 0:
-            code = msg[0]           
+            code = msg[0]
 #==============================================================================
 # handle connect request
 #==============================================================================
@@ -112,7 +112,7 @@ class Server:
                     msg = M_CONNECT + 'no_user'
                 mysend(from_sock, msg)
 #==============================================================================
-# handle messeage exchange: one peer for now. will need multicast later     
+# handle messeage exchange: one peer for now. will need multicast later
 #==============================================================================
             elif code == M_EXCHANGE:
                 from_name = self.logged_sock2name[from_sock]
@@ -122,7 +122,7 @@ class Server:
                 self.indices[from_name].add_msg_and_index(said2)
                 for g in the_guys[1:]:
                     to_sock = self.logged_name2sock[g]
-                    self.indices[g].add_msg_and_index(said2)                
+                    self.indices[g].add_msg_and_index(said2)
                     mysend(to_sock, msg)
 #==============================================================================
 #                 listing available peers
@@ -176,7 +176,7 @@ class Server:
                 self.logout(from_sock)
         else:
             #client died unexpectedly
-            self.logout(from_sock)   
+            self.logout(from_sock)
 
 #==============================================================================
 # main loop, loops *forever*
@@ -198,7 +198,7 @@ class Server:
                #new client request
                sock, address=self.server.accept()
                self.new_client(sock)
-           
+
 def main():
     server=Server()
     server.run()
