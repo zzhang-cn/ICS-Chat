@@ -26,11 +26,8 @@ class Client:
 
     def init_chat(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM )
-        if self.args.d == None:
-            self.socket.connect(SERVER)
-        else: # connect to specified, perhaps remote, server
-            self.socket.connect((self.args.d, CHAT_PORT))
-
+        svr = SERVER if self.args.d == None else (self.args.d, CHAT_PORT)
+        self.socket.connect(svr)
         self.sm = csm.ClientSM(self.socket)
         reading_thread = threading.Thread(target=self.read_input)
         reading_thread.daemon = True
