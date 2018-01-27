@@ -68,7 +68,6 @@ class Client:
             response = json.loads(self.recv())
             if response["status"] == 'ok':
                 self.state = S_LOGGEDIN
-# zz: change!
                 self.sm.set_state(S_LOGGEDIN)
                 self.sm.set_myname(self.name)
                 self.print_instructions()
@@ -81,11 +80,7 @@ class Client:
 
 
     def read_input(self):
-        while True:         # uncomment the below for a stress test
-#            if self.state == S_CHATTING:
-#                text = 'adfadsfafd' + self.name
-#                time.sleep(2)
-#            else:
+        while True:
             text = sys.stdin.readline()[:-1]
             self.console_input.append(text) # no need for lock, append is thread safe
 
