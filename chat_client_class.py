@@ -46,14 +46,12 @@ class Client:
         read, write, error = select.select([self.socket], [], [], 0)
         my_msg = ''
         peer_msg = []
-        peer_code = M_UNDEF
+        #peer_code = M_UNDEF    for json data, peer_code is redundant
         if len(self.console_input) > 0:
             my_msg = self.console_input.pop(0)
         if self.socket in read:
             peer_msg = self.recv()
-            peer_code = peer_msg[0]
-            peer_msg = peer_msg[1:]
-        return my_msg, peer_code, peer_msg
+        return my_msg, peer_msg
 
     def output(self):
         if len(self.system_msg) > 0:
@@ -61,7 +59,7 @@ class Client:
             self.system_msg = ''
 
     def login(self):
-        my_msg, peer_code, peer_msg = self.get_msgs()
+        my_msg, peer_msg = self.get_msgs()
         if len(my_msg) > 0:
             self.name = my_msg
             msg = M_LOGIN + self.name
@@ -112,5 +110,5 @@ class Client:
 # main processing loop
 #==============================================================================
     def proc(self):
-        my_msg, peer_code, peer_msg = self.get_msgs()
-        self.system_msg += self.sm.proc(my_msg, peer_code, peer_msg)
+        my_msg, peer_msg = self.get_msgs()
+        self.system_msg += self.sm.proc(my_msg, peer_msg)
