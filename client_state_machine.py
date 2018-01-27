@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Sun Apr  5 00:00:32 2015
 
@@ -17,16 +16,16 @@ class ClientSM:
 
     def set_state(self, state):
         self.state = state
-        
+
     def get_state(self):
         return self.state
-    
+
     def set_myname(self, name):
         self.me = name
 
     def get_myname(self):
         return self.me
-        
+
     def connect_to(self, peer):
         msg = json.dumps({"action":"connect", "target":peer})
         mysend(self.s, msg)
@@ -59,22 +58,22 @@ class ClientSM:
         if self.state == S_LOGGEDIN:
             # todo: can't deal with multiple lines yet
             if len(my_msg) > 0:
-                
+
                 if my_msg == 'q':
                     self.out_msg += 'See you next time!\n'
                     self.state = S_OFFLINE
-                    
+
                 elif my_msg == 'time':
                     mysend(self.s, json.dumps({"action":"time"}))
                     time_in = json.loads(myrecv(self.s))["results"]
                     self.out_msg += "Time is: " + time_in
-                            
+
                 elif my_msg == 'who':
                     mysend(self.s, json.dumps({"action":"list"}))
                     logged_in = json.loads(myrecv(self.s))["results"]
                     self.out_msg += 'Here are all the users in the system:\n'
                     self.out_msg += logged_in
-                            
+
                 elif my_msg[0] == 'c':
                     peer = my_msg[1:]
                     peer = peer.strip()
@@ -84,7 +83,7 @@ class ClientSM:
                         self.out_msg += '-----------------------------------\n'
                     else:
                         self.out_msg += 'Connection unsuccessful\n'
-                        
+
                 elif my_msg[0] == '?':
                     term = my_msg[1:].strip()
                     mysend(self.s, json.dumps({"action":"search", "target":term}))
@@ -93,7 +92,7 @@ class ClientSM:
                         self.out_msg += search_rslt + '\n\n'
                     else:
                         self.out_msg += '\'' + term + '\'' + ' not found\n\n'
-                        
+
                 elif my_msg[0] == 'p':
                     poem_idx = my_msg[1:].strip()
                     mysend(self.s, json.dumps({"action":"poem", "target":poem_idx}))
@@ -103,20 +102,19 @@ class ClientSM:
                     else:
                         self.out_msg += 'Sonnet ' + poem_idx + ' not found\n\n'
 
-               
                 else:
                     self.out_msg += menu
-                    
+
             if len(peer_msg) > 0:
                 peer_msg = json.loads(peer_msg)
                 if peer_msg["action"] == "connect":
                     self.peer = peer_msg["from"]
                     self.out_msg += 'Request from ' + self.peer + '\n'
-                    self.out_msg += 'You are connected with ' + self.peer 
+                    self.out_msg += 'You are connected with ' + self.peer
                     self.out_msg += '. Chat away!\n\n'
                     self.out_msg += '------------------------------------\n'
                     self.state = S_CHATTING
-                    
+
 #==============================================================================
 # Start chatting, 'bye' for quit
 # This is event handling instate "S_CHATTING"
@@ -128,7 +126,6 @@ class ClientSM:
                     self.disconnect()
                     self.state = S_LOGGEDIN
                     self.peer = ''
-                    
             if len(peer_msg) > 0:    # peer's stuff, coming in
                 peer_msg = json.loads(peer_msg)
                 if peer_msg["action"] == "connect":
@@ -138,18 +135,15 @@ class ClientSM:
                 else:
                     self.out_msg += peer_msg["from"] + peer_msg["message"]
 
-            # I got bumped out
-            #if msg["action"] == "disconnect":
-               # self.state = S_LOGGEDIN
 
             # Display the menu again
             if self.state == S_LOGGEDIN:
                 self.out_msg += menu
 #==============================================================================
-# invalid state                       
+# invalid state
 #==============================================================================
         else:
             self.out_msg += 'How did you wind up here??\n'
             print_state(self.state)
-            
+
         return self.out_msg

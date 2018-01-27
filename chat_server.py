@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Jul 22 00:47:05 2014
 
@@ -34,7 +33,7 @@ class Server:
         self.sonnet_f = open('AllSonnets.txt.idx', 'rb')
         self.sonnet = pkl.load(self.sonnet_f)
         self.sonnet_f.close()
-        
+
     def new_client(self, sock):
         #add to all sockets and to new clients
         print('new client...')
@@ -44,33 +43,36 @@ class Server:
 
     def login(self, sock):
         #read the msg that should have login code plus username
-        msg = json.loads(myrecv(sock))
-        if len(msg) > 0:
+        try:
+            msg = json.loads(myrecv(sock))
+            if len(msg) > 0:
 
-            if msg["action"] == "login":
-                name = msg["name"]
-                if self.group.is_member(name) != True:
-                    #move socket from new clients list to logged clients
-                    self.new_clients.remove(sock)
-                    #add into the name to sock mapping
-                    self.logged_name2sock[name] = sock
-                    self.logged_sock2name[sock] = name
-                    #load chat history of that user
-                    if name not in self.indices.keys():
-                        try:
-                            self.indices[name]=pkl.load(open(name+'.idx','rb'))
-                        except IOError: #chat index does not exist, then create one
-                            self.indices[name] = indexer.Index(name)
-                    print(name + ' logged in')
-                    self.group.join(name)
-                    mysend(sock, json.dumps({"action":"login", "status":"ok"}))
-                else: #a client under this name has already logged in
-                    mysend(sock, json.dumps({"action":"login", "status":"duplicate"}))
-                    print(name + ' duplicate login attempt')
-            else:
-                print ('wrong code received')
-        else: #client died unexpectedly
-            self.logout(sock)
+                if msg["action"] == "login":
+                    name = msg["name"]
+                    if self.group.is_member(name) != True:
+                        #move socket from new clients list to logged clients
+                        self.new_clients.remove(sock)
+                        #add into the name to sock mapping
+                        self.logged_name2sock[name] = sock
+                        self.logged_sock2name[sock] = name
+                        #load chat history of that user
+                        if name not in self.indices.keys():
+                            try:
+                                self.indices[name]=pkl.load(open(name+'.idx','rb'))
+                            except IOError: #chat index does not exist, then create one
+                                self.indices[name] = indexer.Index(name)
+                        print(name + ' logged in')
+                        self.group.join(name)
+                        mysend(sock, json.dumps({"action":"login", "status":"ok"}))
+                    else: #a client under this name has already logged in
+                        mysend(sock, json.dumps({"action":"login", "status":"duplicate"}))
+                        print(name + ' duplicate login attempt')
+                else:
+                    print ('wrong code received')
+            else: #client died unexpectedly
+                self.logout(sock)
+        except:
+            self.all_sockets.remove(sock)
 
     def logout(self, sock):
         #remove sock from all lists
@@ -87,9 +89,9 @@ class Server:
 # main command switchboard
 #==============================================================================
     def handle_msg(self, from_sock):
-        #read msg code 
+        #read msg code
         msg = myrecv(from_sock)
-        if len(msg) > 0:          
+        if len(msg) > 0:
 #==============================================================================
 # handle connect request
 #==============================================================================
@@ -112,7 +114,7 @@ class Server:
                     msg = json.dumps({"action":"connect", "status":"no-user"})
                 mysend(from_sock, msg)
 #==============================================================================
-# handle messeage exchange: one peer for now. will need multicast later     
+# handle messeage exchange: one peer for now. will need multicast later
 #==============================================================================
             elif msg["action"] == "exchange":
                 from_name = self.logged_sock2name[from_sock]
@@ -122,7 +124,7 @@ class Server:
                 self.indices[from_name].add_msg_and_index(said2)
                 for g in the_guys[1:]:
                     to_sock = self.logged_name2sock[g]
-                    self.indices[g].add_msg_and_index(said2)                
+                    self.indices[g].add_msg_and_index(said2)
                     mysend(to_sock, json.dumps({"action":"exchange", "from":msg["from"], "message":msg["message"]}))
 #==============================================================================
 #                 listing available peers
@@ -172,11 +174,10 @@ class Server:
 #==============================================================================
 #                 the "from" guy really, really has had enough
 #==============================================================================
-            #elif code == M_LOGOUT:
-                #self.logout(from_sock)
+
         else:
             #client died unexpectedly
-            self.logout(from_sock)   
+            self.logout(from_sock)
 
 #==============================================================================
 # main loop, loops *forever*
@@ -198,7 +199,7 @@ class Server:
                #new client request
                sock, address=self.server.accept()
                self.new_client(sock)
-           
+
 def main():
     server=Server()
     server.run()
