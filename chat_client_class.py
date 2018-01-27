@@ -2,6 +2,7 @@ import time
 import socket
 import select
 import sys
+import json
 from chat_utils import *
 import client_state_machine as csm
 
@@ -46,14 +47,12 @@ class Client:
         read, write, error = select.select([self.socket], [], [], 0)
         my_msg = ''
         peer_msg = []
-        peer_code = M_UNDEF
+        #peer_code = M_UNDEF    for json data, peer_code is redundant
         if len(self.console_input) > 0:
             my_msg = self.console_input.pop(0)
         if self.socket in read:
             peer_msg = self.recv()
-            peer_code = peer_msg[0]
-            peer_msg = peer_msg[1:]
-        return my_msg, peer_code, peer_msg
+        return my_msg, peer_msg
 
     def output(self):
         if len(self.system_msg) > 0:
@@ -61,20 +60,20 @@ class Client:
             self.system_msg = ''
 
     def login(self):
-        my_msg, peer_code, peer_msg = self.get_msgs()
+        my_msg, peer_msg = self.get_msgs()
         if len(my_msg) > 0:
             self.name = my_msg
-            msg = M_LOGIN + self.name
+            msg = json.dumps({"action":"login", "name":self.name})
             self.send(msg)
-            response = self.recv()
-            if response == M_LOGIN+'ok':
+            response = json.loads(self.recv())
+            if response["status"] == 'ok':
                 self.state = S_LOGGEDIN
 # zz: change!
                 self.sm.set_state(S_LOGGEDIN)
                 self.sm.set_myname(self.name)
                 self.print_instructions()
                 return (True)
-            elif response == M_LOGIN + 'duplicate':
+            elif response["status"] == 'duplicate':
                 self.system_msg += 'Duplicate username, try again'
                 return False
         else:               # fix: dup is only one of the reasons
@@ -112,5 +111,5 @@ class Client:
 # main processing loop
 #==============================================================================
     def proc(self):
-        my_msg, peer_code, peer_msg = self.get_msgs()
-        self.system_msg += self.sm.proc(my_msg, peer_code, peer_msg)
+        my_msg, peer_msg = self.get_msgs()
+        self.system_msg += self.sm.proc(my_msg, peer_msg)

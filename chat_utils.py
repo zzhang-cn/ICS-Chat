@@ -1,17 +1,6 @@
 import socket
 import time
 
-M_UNDEF     = '0'
-M_LOGIN     = '1'
-M_CONNECT   = '2'
-M_EXCHANGE  = '3'
-M_LOGOUT    = '4'
-M_DISCONNECT= '5'
-M_SEARCH    = '6'
-M_LIST      = '7'
-M_POEM      = '8'
-M_TIME      = '9'
-
 # use local loop back address by default
 #CHAT_IP = '127.0.0.1'
 CHAT_IP = socket.gethostbyname(socket.gethostname())
